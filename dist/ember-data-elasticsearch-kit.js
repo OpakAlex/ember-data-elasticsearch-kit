@@ -7,6 +7,8 @@
 
 (function() {
   DS.ElasticSearchAdapter = DS.Adapter.extend({
+    defaultSerializer: '-rest',
+    
     buildURL: function() {
       var host, namespace, url;
       host = Ember.get(this, "host");
@@ -103,7 +105,6 @@
           _this = this;
         json = {};
         _type = Ember.String.pluralize(type.typeKey);
-        modelArray.set('total', data['hits'].total);
         json[_type] = data['hits']['hits'].getEach('_source');
         if (data.facets) {
           Object.keys(data.facets).forEach(function(key) {
@@ -118,6 +119,7 @@
         if (query.fields && query.fields.length === 0) {
           json[_type] = data['hits']['hits'].getEach('_id');
         }
+        json.meta = {total: data['hits'].total};
         return json;
       };
       return this.ajax('_search', 'POST', normalizeResponce, {
